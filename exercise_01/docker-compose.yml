@@ -1,0 +1,24 @@
+services:
+  backend:
+    image: postgres:13
+    container_name: storex-backend
+    command: >
+      sh -c "until pg_isready -h postgres -p 5432 -U postgres; 
+             do echo 'Waiting for database...'; sleep 2; done; 
+             echo 'SUCCESS: Connected to database postgres:5432 via SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/storex'"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/storex
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=secret
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:13
+    container_name: storex-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=storex
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
