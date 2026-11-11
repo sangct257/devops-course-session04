@@ -1,0 +1,38 @@
+services:
+  backend:
+    image: postgres:13
+    # Đã XÓA dòng container_name để cho phép scale nhiều replicas
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=storex_admin
+      - DB_PASS=supersecret_dont_share
+      - DB_NAME=storex_db
+    networks:
+      - storex-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:13
+    container_name: storex-db
+    environment:
+      - POSTGRES_DB=storex_db
+      - POSTGRES_USER=storex_admin
+      - POSTGRES_PASSWORD=supersecret_dont_share
+    volumes:
+      - storex_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U storex_admin -d storex_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - storex-net
+
+networks:
+  storex-net:
+    driver: bridge
+
+volumes:
+  storex_pgdata:

@@ -1,0 +1,19 @@
+services:
+  backend:
+    container_name: !reset null  # Hủy bỏ đặt tên cố định để scale được
+    restart: always
+    environment:
+      - ENV=production
+      - DEBUG_MODE=false
+    deploy:
+      mode: replicated
+      replicas: 3
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+
+  postgres:
+    restart: always

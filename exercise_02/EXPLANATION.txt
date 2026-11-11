@@ -1,0 +1,11 @@
+# Giải thích cơ chế Healthcheck và Volumes (Bài tập 2 - StoreX)
+
+## 1. Cơ chế Healthcheck đã áp dụng
+- **PostgreSQL (`storex-db`):** Sử dụng lệnh `pg_isready -U admin -d storex_db` để kiểm tra PostgreSQL đã sẵn sàng tiếp nhận kết nối dữ liệu hay chưa.
+- **Redis (`storex-redis`):** Sử dụng lệnh `redis-cli ping` để kiểm tra Redis server đã phản hồi `PONG` hay chưa.
+- **Ràng buộc phụ thuộc (`depends_on` với `service_healthy`):** 
+  Cấu hình `condition: service_healthy` tại service `backend` bắt buộc container `backend` phải chờ cho đến khi cả 2 service `postgres` và `redis` vượt qua các bài test healthcheck và đạt trạng thái **Healthy** thì mới được phép khởi chạy. Điều này giải quyết triệt để lỗi race condition (crash backend khi DB/Redis chưa dựng xong).
+
+## 2. Giải pháp lưu trữ dữ liệu bền vững (Volumes)
+- Khai báo một named volume `storex_pgdata` và mount vào thư mục `/var/lib/postgresql/data` của PostgreSQL.
+- Giúp dữ liệu không bị mất đi khi thực hiện lệnh `docker compose down` hoặc khi container bị xóa/dừng.

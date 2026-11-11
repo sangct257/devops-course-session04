@@ -1,0 +1,11 @@
+services:
+  backend:
+    ports:
+      - "8080:8080" # Mở port để developer debug trực tiếp ở local/staging
+    environment:
+      - ENV=staging
+      - DEBUG_MODE=true
+
+  postgres:
+    ports:
+      - "5432:5432" # Mở port DB ở local để dev dùng DBeaver/Navicat truy cập

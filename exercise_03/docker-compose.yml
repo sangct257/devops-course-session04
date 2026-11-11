@@ -1,0 +1,44 @@
+services:
+  backend:
+    image: postgres:13
+    container_name: storex-backend
+    command: >
+      sh -c "until pg_isready -h postgres -p 5432 -U ${POSTGRES_USER} -d ${POSTGRES_DB}; 
+             do echo 'Waiting for database...'; sleep 2; done; 
+             echo 'SUCCESS: Connected via custom network storex-net with USER=${POSTGRES_USER} DB=${POSTGRES_DB}'"
+    ports:
+      - "${BACKEND_PORT}:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASS=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_DB}
+    networks:
+      - storex-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:13
+    container_name: storex-db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - storex_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - storex-net
+
+networks:
+  storex-net:
+    driver: bridge
+
+volumes:
+  storex_pgdata:
